@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-black: #f8fafc; /* Crisp, clean slate light background */
+  --color-white: #0f172a; /* Sophisticated deep slate for high contrast headings */
+
+  /* Map the zinc palette to bright elegant shades for an effortless light theme */
+  --color-zinc-50: #0f172a;
+  --color-zinc-100: #1e293b;
+  --color-zinc-200: #334155;
+  --color-zinc-300: #475569;
+  --color-zinc-400: #64748b;
+  --color-zinc-500: #94a3b8;
+  --color-zinc-650: #cbd5e1;
+  --color-zinc-700: #cbd5e1;
+  --color-zinc-800: #e2e8f0;
+  --color-zinc-900: #ffffff; /* Clean white for structural cards and panels */
+  --color-zinc-950: #f1f5f9; /* Sophisticated sidebar and navigation area bg */
+
+  /* Rose/Cherry Red (Vibrant but modern, not oversaturated) */
+  --color-red-500: #f43f5e;
+  --color-red-600: #e11d48;
+  --color-red-700: #be123c;
+
+  /* Royal Cobalt Blue */
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+
+  /* Balanced Mint / Sage Teal */
+  --color-emerald-500: #0d9488;
+  --color-emerald-600: #0f766e;
+  --color-emerald-700: #115e59;
+
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-family: var(--font-sans);
+  }
+}

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidString(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+             request.resource.data[field].size() >= minLen &&
+             request.resource.data[field].size() <= maxLen;
+    }
+
+    // ===============================================================
+    // Gyms
+    // ===============================================================
+    match /gyms/{gymId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    match /boxers/{boxerId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    match /tournaments/{tournamentId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    match /matches/{matchId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+  }
+}

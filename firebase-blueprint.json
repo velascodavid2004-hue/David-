@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "Gym": {
+      "title": "Gym",
+      "description": "Un gimnasio de boxeo o club amateur.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "ownerId"]
+    },
+    "Boxer": {
+      "title": "Boxer",
+      "description": "Un boxeador amateur.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "gymId": { "type": "string" },
+        "weightClass": { "type": "string" },
+        "wins": { "type": "number" },
+        "losses": { "type": "number" },
+        "draws": { "type": "number" },
+        "rankingPoints": { "type": "number" },
+        "cornerColor": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "weightClass"]
+    },
+    "Tournament": {
+      "title": "Tournament",
+      "description": "Un torneo o liga de boxeo.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["draft", "open", "active", "completed"] },
+        "weightClass": { "type": "string" },
+        "organizerId": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["name", "status"]
+    },
+    "Match": {
+      "title": "Match",
+      "description": "Una pelea programada.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tournamentId": { "type": "string" },
+        "boxer1Id": { "type": "string" },
+        "boxer2Id": { "type": "string" },
+        "winnerId": { "type": "string" },
+        "round": { "type": "number" },
+        "matchIndex": { "type": "number" },
+        "scheduledDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] }
+      },
+      "required": ["tournamentId", "boxer1Id", "boxer2Id", "status"]
+    }
+  },
+  "firestore": {
+    "/gyms": {
+      "schema": "Gym",
+      "description": "Colección de gimnasios registrados."
+    },
+    "/boxers": {
+      "schema": "Boxer",
+      "description": "Colección de boxeadores."
+    },
+    "/tournaments": {
+      "schema": "Tournament",
+      "description": "Colección de torneos."
+    },
+    "/matches": {
+      "schema": "Match",
+      "description": "Colección de peleas."
+    }
+  }
+}

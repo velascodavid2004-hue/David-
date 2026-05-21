@@ -1,0 +1,5 @@
+{
+  "name": "BoxLeague: Torneos de Boxeo Amateur",
+  "description": "Plataforma para organizar ligas y torneos de boxeo amateur entre gimnasios y amigos. Gestión de rankings, programación de peleas y generación de llaves.",
+  "requestFramePermissions": []
+}
