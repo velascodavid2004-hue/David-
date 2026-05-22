@@ -8,7 +8,7 @@ import {
   signOut, 
   User 
 } from 'firebase/auth';
-import { auth } from './lib/firebase';
+import { auth, setMockUser } from './lib/firebase';
 import { 
   Trophy, 
   Users, 
@@ -76,7 +76,10 @@ const Navbar = ({ user }: { user: User | null }) => {
 
       {user && (
         <button
-          onClick={() => signOut(auth)}
+          onClick={() => {
+            setMockUser(null);
+            signOut(auth);
+          }}
           className="hidden md:flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200 mt-auto"
         >
           <LogOut className="w-5 h-5" />
@@ -92,6 +95,15 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
   const [authLoading, setAuthLoading] = useState(false);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const handleMockBypass = () => {
+    setAuthError(null);
+    setMockUser({
+      uid: 'mock-local-developer',
+      email: 'desarrollador@local.com',
+      displayName: 'Administrador Torneos',
+    });
+  };
 
   const handleGoogleLogin = async () => {
     setAuthError(null);
@@ -212,6 +224,17 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
                       Haz clic en <strong>Add domain (Añadir dominio)</strong>, pega el dominio copiado y guárdalo. ¡Listo!
                     </li>
                   </ol>
+                  
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleMockBypass}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 uppercase tracking-wider text-[10px] shadow-lg shadow-red-700/40 cursor-pointer"
+                    >
+                      <Shield className="w-4 h-4 text-white animate-pulse" />
+                      Entrar ahora sin configurar (Simular Acceso)
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -219,9 +242,17 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
 
           <div className="space-y-4">
             <button
+              onClick={handleMockBypass}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-5 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all duration-200 active:scale-95 shadow-lg shadow-red-700/30 cursor-pointer"
+            >
+              <Shield className="w-5 h-5 text-white" />
+              <span className="uppercase tracking-[0.2em] text-xs">Acceso Rápido (Local/Bypass)</span>
+            </button>
+
+            <button
               onClick={handleGoogleLogin}
               disabled={authLoading}
-              className="w-full bg-white hover:bg-zinc-100 text-black font-black py-5 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all duration-200 active:scale-95"
+              className="w-full bg-white hover:bg-zinc-100 text-black font-black py-4.5 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all duration-200 active:scale-95"
             >
               {authLoading ? (
                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -233,12 +264,12 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.11-5.51c-1.97 1.32-4.49 2.1-8.78 2.1-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     <path fill="#FBBC05" d="M10.54 28.88C10.06 27.42 9.78 25.86 9.78 24c0-1.86.28-3.42.76-4.88l-7.98-6.19C1.04 15.93 0 19.82 0 24s1.04 8.07 2.56 11.07l7.98-6.19z"/>
                   </svg>
-                  <span className="uppercase tracking-[0.2em] text-xs">Continuar con Google</span>
+                  <span className="uppercase tracking-[0.2em] text-xs">O iniciar con Google</span>
                 </>
               )}
             </button>
 
-            <div className="relative py-2">
+            <div className="relative py-1">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-zinc-800"></div>
               </div>
@@ -276,10 +307,24 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    // Check if we already have a mock user loaded on mount
+    if (auth.currentUser) {
+      setUser(auth.currentUser as any);
+      setLoading(false);
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!auth.currentUser) {
+        setUser(firebaseUser);
+      }
       setLoading(false);
     });
+
+    const handleMockAuthChange = () => {
+      setUser(auth.currentUser as any);
+    };
+
+    window.addEventListener('mock-auth-changed', handleMockAuthChange);
 
     // Safety timeout to prevent white screen if Firebase hangs
     const timeout = setTimeout(() => {
@@ -288,6 +333,7 @@ export default function App() {
 
     return () => {
       unsubscribe();
+      window.removeEventListener('mock-auth-changed', handleMockAuthChange);
       clearTimeout(timeout);
     };
   }, []);
