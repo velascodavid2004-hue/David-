@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { Boxer } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export async function predictWinner(
   boxer1: Boxer, 

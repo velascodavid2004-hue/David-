@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Shield,
   Calendar,
-  Award
+  Award,
+  Copy,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -88,9 +90,12 @@ const Navbar = ({ user }: { user: User | null }) => {
 const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user: User | null, loading: boolean }) => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleGoogleLogin = async () => {
     setAuthError(null);
+    setUnauthorizedDomain(null);
     setAuthLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -101,6 +106,9 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
         setAuthError("ERROR: El inicio de sesión con Google no está habilitado. Habilítalo en: Authentication > Sign-in method > Añadir nuevo proveedor > Google.");
       } else if (err.code === 'auth/admin-restricted-operation') {
         setAuthError("ERROR: Operación restringida. Asegúrate de que Google Auth esté configurado correctamente en tu Consola de Firebase.");
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setUnauthorizedDomain(window.location.hostname);
+        setAuthError("ERROR (auth/unauthorized-domain): Este dominio de previsualización no está autorizado en tu proyecto de Firebase.");
       } else {
         setAuthError(`Error con Google: ${err.message}`);
       }
@@ -161,8 +169,51 @@ const AuthGate = ({ children, user, loading }: { children: React.ReactNode, user
           </div>
 
           {authError && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs p-5 rounded-2xl font-bold leading-relaxed">
-              <p>{authError}</p>
+            <div className="space-y-4">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs p-5 rounded-2xl font-bold leading-relaxed">
+                <p>{authError}</p>
+              </div>
+
+              {unauthorizedDomain && (
+                <div className="bg-zinc-950 border border-zinc-800/80 p-5 rounded-2xl space-y-4 text-xs">
+                  <div className="font-bold text-zinc-200">¿Cómo solucionar este error?</div>
+                  <ol className="list-decimal list-inside space-y-3.5 text-zinc-400 font-medium">
+                    <li className="leading-relaxed">
+                      Copia el dominio actual:
+                      <div className="mt-2 flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-800 px-3 py-2.5 rounded-xl text-zinc-300 font-mono select-all select-none">
+                        <span className="truncate text-[11px] font-bold">{unauthorizedDomain}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(unauthorizedDomain);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white flex-shrink-0 cursor-pointer"
+                          title="Copiar dominio"
+                        >
+                          {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <div className="mt-2 text-[10px] text-zinc-500 leading-snug">
+                        (También se sugiere agregar <code className="font-mono bg-zinc-900 text-zinc-400 px-1 py-0.5 rounded">localhost</code> si estás probando localmente)
+                      </div>
+                    </li>
+                    <li className="leading-relaxed">
+                      Entra a la <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-red-500 hover:underline font-bold inline-flex items-center gap-1">Consola de Firebase (clic aquí)</a>.
+                    </li>
+                    <li className="leading-relaxed">
+                      Ve a <strong>Build (Compilación)</strong> &gt; <strong>Authentication</strong>.
+                    </li>
+                    <li className="leading-relaxed">
+                      Selecciona la pestaña <strong>Settings (Ajustes)</strong> y haz clic en la sección lateral de <strong>Authorized domains (Dominios autorizados)</strong>.
+                    </li>
+                    <li className="leading-relaxed">
+                      Haz clic en <strong>Add domain (Añadir dominio)</strong>, pega el dominio copiado y guárdalo. ¡Listo!
+                    </li>
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 
